@@ -9,7 +9,7 @@ except:
     st.error("Model files not found. Please run train_model.py first.")
 
 # 2. Page Configuration
-st.set_page_config(page_title="PhishNet AI", page_icon="", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
 
 # 3. Custom CSS
 st.markdown("""
@@ -39,30 +39,42 @@ if st.button("Analyze Email Threat"):
         
         # Educational Flag Detection
         red_flags = []
+        
+        # Heuristic 1: Check for Urgency
         if any(word in email_input.lower() for word in ['urgent', 'immediately', '2 hours', 'action required']):
             red_flags.append("**Artificial Urgency:** Scammers use time pressure to bypass your critical thinking.")
-        if any(word in email_input.lower() for word in ['verify', 'login', 'account', 'password', 'click here']):
+        
+        # Heuristic 2: Refined Credential Harvesting check
+        if any(word in email_input.lower() for word in ['verify login', 'update password', 'confirm identity', 'account compromised', 'click here to verify']):
             red_flags.append("**Credential Harvesting:** This email likely leads to a fake login page designed to steal your data.")
+        
+        # Heuristic 3: Check for 419 (Nigerian) Markers
         if any(word in email_input.lower() for word in ['transfer', 'million', 'inheritance', 'partnership', 'funds']):
             red_flags.append("🇳🇬 **Advance Fee Fraud:** Matches patterns found in traditional '419' or Nigerian fraud tactics.")
 
-        # RESULTS APPEAR HERE (No JS scroll needed, Streamlit handles the view)
+        # Heuristic 4: Suspicious Links / Domain Spoofing (FIXED POSITION)
+        if "http" in email_input.lower() and not any(domain in email_input.lower() for domain in ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng']):
+            if any(bank in email_input.lower() for bank in ['bank', 'secure', 'verify', 'login', 'service']):
+                red_flags.append("**Domain Spoofing:** The link looks suspicious. Scammers often use 'secure-verify' or unofficial domains to mimic real institutions.")
+
         st.divider()
 
+        # Final Display Logic
         if prediction == 1 or probability > 0.7 or len(red_flags) > 0:
             st.error(f"[!] THREAT IDENTIFIED | RISK INDEX: {probability*100:.1f}%")
             
             st.markdown("### [?] Educational Breakdown")
             for flag in red_flags:
                 st.info(flag)
+            
             if not red_flags:
-                st.info(" **Statistical Match:** The AI detected hidden linguistic structures common in phishing attacks.")
+                st.info("**Statistical Match:** The AI detected hidden linguistic structures common in phishing attacks.")
             
             st.warning("### [!] Recommended Security Protocol")
             st.markdown("""
             * **Don't Click:** Never click links or download attachments from suspicious senders.
             * **Verify Source:** Check the sender's actual email address, not just the display name.
-            * **Contact Directly:** If it claims to be your bank, call them using the official number on their website.
+            * **Contact Directly:** If it claims to be your bank or service provider, call them using the official number on their website.
             """)
         else:
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
