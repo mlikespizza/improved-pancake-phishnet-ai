@@ -1,15 +1,15 @@
 import streamlit as st
 import joblib
 
-# 1. Load the saved model and vectorizer
+# 1. Page Configuration (MUST BE FIRST)
+st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
+
+# 2. Load the saved model and vectorizer
 try:
     model = joblib.load('phishnet_model.pkl')
     tfidf = joblib.load('tfidf_vectorizer.pkl')
 except:
     st.error("Model files not found. Please run train_model.py first.")
-
-# 2. Page Configuration
-st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
 
 # 3. Custom CSS
 st.markdown("""
@@ -52,7 +52,7 @@ if st.button("Analyze Email Threat"):
         if any(word in email_input.lower() for word in ['transfer', 'million', 'inheritance', 'partnership', 'funds']):
             red_flags.append("🇳🇬 **Advance Fee Fraud:** Matches patterns found in traditional '419' or Nigerian fraud tactics.")
 
-        # Heuristic 4: Suspicious Links / Domain Spoofing (FIXED POSITION)
+        # Heuristic 4: Suspicious Links / Domain Spoofing
         if "http" in email_input.lower() and not any(domain in email_input.lower() for domain in ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng']):
             if any(bank in email_input.lower() for bank in ['bank', 'secure', 'verify', 'login', 'service']):
                 red_flags.append("**Domain Spoofing:** The link looks suspicious. Scammers often use 'secure-verify' or unofficial domains to mimic real institutions.")
