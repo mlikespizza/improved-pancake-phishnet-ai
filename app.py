@@ -73,16 +73,24 @@ if st.button("Analyze Email Threat"):
 
         st.divider()
 
-        # 7. Optimized Multi-Tiered Classification Boundary (Safety-Valve Upgrade)
-        # To account for vocabulary distribution shifts where promotional text crosses 60%,
-        # we require a tight coordination between statistical outputs and expert heuristic components.
-        if (prediction == 1 and probability >= 0.72) or (len(red_flags) >= 2 and probability >= 0.50) or (probability >= 0.85):
+        # 7. Optimized Multi-Tiered Classification Boundary (The Final Shield)
+        # CRITICAL UPDATE: If the text triggers multiple explicit local social engineering 
+        # heuristics (urgency, harvesting, or unverified domains), it is structurally 
+        # flagged as a threat, completely overriding statistical dataset blind spots.
+        
+        # Base condition: Model flags it OR high probability density
+        is_threat = (prediction == 1 or probability >= 0.65)
+        
+        # Override condition: Severe behavioral red flags are found (even if ML model misses it)
+        if len(red_flags) >= 1:
             is_threat = True
+            # Dynamically adjust risk index display to reflect behavioral hazard
+            display_probability = max(probability, 0.75)
         else:
-            is_threat = False
+            display_probability = probability
 
         if is_threat:
-            st.error(f"[!] THREAT IDENTIFIED | RISK INDEX: {probability*100:.1f}%")
+            st.error(f"[!] THREAT IDENTIFIED | RISK INDEX: {display_probability*100:.1f}%")
             
             st.markdown("### [?] Educational Breakdown")
             for flag in red_flags:
@@ -102,9 +110,6 @@ if st.button("Analyze Email Threat"):
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
             st.markdown("### [+] Why this was marked safe")
             st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
-
-    else:
-        st.warning("Please paste an email body to analyze.")
 
 # Footer Disclaimer
 st.markdown('<p class="footer">PhishNet AI is an educational tool. Use your own judgment for critical security decisions.</p>', unsafe_allow_html=True)
