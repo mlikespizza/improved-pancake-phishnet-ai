@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 
 # 1. Page Configuration (MUST BE FIRST)
-st.set_page_config(page_title="PhishNet AI", page_icon=" 🤺 ", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
 
 # 2. Load the saved model and vectorizer
 try:
