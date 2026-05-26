@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 
 # 1. Page Configuration (MUST BE FIRST)
-st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon=" 🤺 ", layout="centered")
 
 # 2. Load the saved model and vectorizer
 try:
@@ -44,42 +44,44 @@ if st.button("Analyze Email Threat"):
         # Initialize Heuristic Evaluation Tracking
         red_flags = []
         
-        # Normalize input with padded spacing to protect word boundaries
-        padded_input = f" {email_input.lower().strip()} "
-        # Replace common punctuation with spaces to keep word boundaries isolated
-        for punct in ['.', ',', '!', '?', ';', ':', '(', ')', '[', ']', '\n', '\r']:
-            padded_input = padded_input.replace(punct, ' ')
-        # Standardize multiple spaces into a single space token
-        padded_input = " ".join(padded_input.split())
-        padded_input = f" {padded_input} "
+        # Normalize input with strict spaces and strip punctuation to isolate words
+        clean_input = " " + email_input.lower() + " "
+        for punct in ['.', ',', '!', '?', ';', ':', '(', ')', '[', ']', '{', '}', '\n', '\r', '"', "'", '-']:
+            clean_input = clean_input.replace(punct, ' ')
+        padded_input = " " + " ".join(clean_input.split()) + " "
 
         # Heuristic 1: Artificial Urgency Matrix
-        urgency_keywords = ['urgent', 'immediately', '2 hours', '12 hours', 'action required', 'act now', 'suspended immediately']
+        urgency_keywords = ['urgent', 'immediately', '2 hours', '12 hours', 'action required', 'act now', 'suspended']
         if any(f" {word} " in padded_input for word in urgency_keywords):
             red_flags.append("**Artificial Urgency:** Scammers implement aggressive time pressure matrices to bypass your critical evaluation loops.")
         
         # Heuristic 2: Credential Harvesting Phrasing
-        harvesting_keywords = ['verify login', 'update password', 'confirm identity', 'account compromised', 'click here to verify', 'link my identity', 'restrict outward transfers']
+        harvesting_keywords = ['verify', 'login', 'password', 'identity', 'compromised', 'restricted', 'bvn', 'nin', 'linkage']
         if any(f" {word} " in padded_input for word in harvesting_keywords):
-            red_flags.append("**Credential Harvesting:** This email text targets security account verification patterns designed to compromise sensitive user profiles.")
+            red_flags.append("**Credential Harvesting Target:** The email text targets security verification patterns or account linkage dependencies common in data harvesting traps.")
         
-        # Heuristic 3: 419 / Nigerian Advance Fee Fraud Tokens
-        scam_keywords = ['transfer', 'million', 'inheritance', 'partnership', 'funds', 'prize', 'bvn', 'nin', 'linkage failure']
+        # Heuristic 3: 419 / Financial Fraud Tokens
+        scam_keywords = ['transfer', 'million', 'inheritance', 'partnership', 'funds', 'prize', 'claim']
         if any(f" {word} " in padded_input for word in scam_keywords):
-            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Content vectors mirror high-risk patterns traditional to 419 social engineering architectures or local banking identification traps.")
+            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Semantic tokens match risk profiles common to traditional 419 social engineering architectures or localized inheritance scams.")
 
-        # Heuristic 4: Unverified Domain / Anchor Detection
+        # Heuristic 4: Link Safety Check
         if "http" in email_input.lower():
-            trusted_domains = ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng']
+            trusted_domains = ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng', 'youversion']
             if not any(domain in email_input.lower() for domain in trusted_domains):
-                red_flags.append("**Suspicious Redirect Hook:** The system detected web hyperlinks containing parameters unverified by regional safety whitelists.")
+                red_flags.append("**Unverified Hyperlink Redirect:** The system detected web redirect links unverified by trusted infrastructure whitelists.")
 
         st.divider()
 
-        # 7. Unified Multi-Tiered Classification Boundary
-        # A threat is confirmed if the ML model signals danger (prediction == 1) AND has supporting probability density,
-        # OR if a high volume of explicit psychological red flags are triggered concurrently.
-        if (prediction == 1 and probability >= 0.52) or (len(red_flags) >= 2) or (probability >= 0.75):
+        # 7. Optimized Multi-Tiered Classification Boundary (Safety-Valve Upgrade)
+        # To account for vocabulary distribution shifts where promotional text crosses 60%,
+        # we require a tight coordination between statistical outputs and expert heuristic components.
+        if (prediction == 1 and probability >= 0.72) or (len(red_flags) >= 2 and probability >= 0.50) or (probability >= 0.85):
+            is_threat = True
+        else:
+            is_threat = False
+
+        if is_threat:
             st.error(f"[!] THREAT IDENTIFIED | RISK INDEX: {probability*100:.1f}%")
             
             st.markdown("### [?] Educational Breakdown")
@@ -99,7 +101,7 @@ if st.button("Analyze Email Threat"):
             # Safe Classification Return
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
             st.markdown("### [+] Why this was marked safe")
-            st.write("The evaluated data block maps cleanly inside standard communication distributions and lacks concentrated high-risk social engineering markers.")
+            st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
 
     else:
         st.warning("Please paste an email body to analyze.")
