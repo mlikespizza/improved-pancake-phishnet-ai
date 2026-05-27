@@ -2,14 +2,19 @@ import streamlit as st
 import joblib
 
 # 1. Page Configuration (MUST BE FIRST)
-st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
 
-# 2. Load the saved model and vectorizer
+# 2. Cache the models in memory so the cloud app runs instantly!
+@st.cache_resource
+def load_models():
+    m = joblib.load('phishnet_model.pkl')
+    v = joblib.load('tfidf_vectorizer.pkl')
+    return m, v
+
 try:
-    model = joblib.load('phishnet_model.pkl')
-    tfidf = joblib.load('tfidf_vectorizer.pkl')
+    model, tfidf = load_models()
 except Exception as e:
-    st.error("Model files not found. Please run train_model.py first.")
+    st.error("Model files not found. Please ensure phishnet_model.pkl and tfidf_vectorizer.pkl are uploaded.")
 
 # 3. Custom CSS for Dark Theme
 st.markdown("""
@@ -73,19 +78,15 @@ if st.button("Analyze Email Threat"):
 
         st.divider()
 
-        # 7. Optimized Multi-Tiered Classification Boundary (The Final Shield)
-        # If the text triggers any explicit localized or behavioral social engineering heuristics 
-        # (urgency, harvesting, fraud tokens), it is structurally flagged as a threat.
-        # This completely overrides statistical model blind spots caused by localized vocabulary shifts.
-        
-        # Base condition: Machine Learning model registers a statistical threat
+        # 7. Optimized Multi-Tiered Classification Boundary
         is_threat = (prediction == 1 or probability >= 0.65)
         
-        # Safety Valve Override: If expert heuristic red flags are triggered, force threat state
+        # Dynamic Risk Calculator: Instead of forcing an 88% cap, we add a 15% penalty 
+        # to the ML probability for every red flag found, capping at 99.9% max.
         if len(red_flags) >= 1:
             is_threat = True
-            # Dynamically display a risk index reflecting the heuristic hazard severity
-            display_probability = max(probability, 0.88)
+            heuristic_penalty = len(red_flags) * 0.15
+            display_probability = min(probability + heuristic_penalty, 0.999)
         else:
             display_probability = probability
 
@@ -106,7 +107,6 @@ if st.button("Analyze Email Threat"):
             * **Contact Directly:** Reach out to organizational support lines using authenticated contacts independent of the suspicious text message.
             """)
         else:
-            # Safe Classification Return
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
             st.markdown("### [+] Why this was marked safe")
             st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
@@ -114,5 +114,4 @@ if st.button("Analyze Email Threat"):
     else:
         st.warning("Please paste an email body to analyze.")
 
-# Footer Disclaimer
 st.markdown('<p class="footer">PhishNet AI is an educational tool. Use your own judgment for critical security decisions.</p>', unsafe_allow_html=True)
