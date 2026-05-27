@@ -4,15 +4,10 @@ import joblib
 # 1. Page Configuration (MUST BE FIRST)
 st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
 
-# 2. Cache the models in memory so the cloud app runs instantly!
-@st.cache_resource
-def load_models():
-    m = joblib.load('phishnet_model.pkl')
-    v = joblib.load('tfidf_vectorizer.pkl')
-    return m, v
-
+# 2. Load the saved model and vectorizer (Without Cache to prevent Cloud memory crashes)
 try:
-    model, tfidf = load_models()
+    model = joblib.load('phishnet_model.pkl')
+    tfidf = joblib.load('tfidf_vectorizer.pkl')
 except Exception as e:
     st.error("Model files not found. Please ensure phishnet_model.pkl and tfidf_vectorizer.pkl are uploaded.")
 
@@ -34,7 +29,7 @@ st.markdown('<p class="main-title">PhishNet AI</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-text">Check if an email is a phishing trap.</p>', unsafe_allow_html=True)
 
 # 5. User Input Layer
-email_input = st.text_area("", placeholder="Paste the suspicious email text here...", height=250)
+email_input = st.text_area("Email Content", label_visibility="collapsed", placeholder="Paste the suspicious email text here...", height=250)
 
 # 6. Analysis and Expert Heuristic Logic
 if st.button("Analyze Email Threat"):
@@ -43,13 +38,12 @@ if st.button("Analyze Email Threat"):
         transformed_input = tfidf.transform([email_input])
         
         # Machine Learning Predictions
-        prediction = model.predict(transformed_input)[0]
         probability = model.predict_proba(transformed_input)[0][1] 
         
         # Initialize Heuristic Evaluation Tracking
         red_flags = []
         
-        # Normalize input with strict spaces and strip punctuation to isolate words
+        # Normalize input with strict spaces to isolate words
         clean_input = " " + email_input.lower() + " "
         for punct in ['.', ',', '!', '?', ';', ':', '(', ')', '[', ']', '{', '}', '\n', '\r', '"', "'", '-']:
             clean_input = clean_input.replace(punct, ' ')
@@ -63,34 +57,45 @@ if st.button("Analyze Email Threat"):
         # Heuristic 2: Credential Harvesting Phrasing
         harvesting_keywords = ['verify', 'login', 'password', 'identity', 'compromised', 'restricted', 'bvn', 'nin', 'linkage', 'restriction']
         if any(f" {word} " in padded_input for word in harvesting_keywords):
-            red_flags.append("**Credential Harvesting Target:** The email text targets security verification patterns or account linkage dependencies common in data harvesting traps.")
+            red_flags.append("**Credential Harvesting Target:** The email text targets security verification patterns or account linkage dependencies.")
         
         # Heuristic 3: 419 / Financial Fraud Tokens
         scam_keywords = ['transfer', 'transfers', 'million', 'inheritance', 'partnership', 'funds', 'prize', 'claim', 'central bank']
         if any(f" {word} " in padded_input for word in scam_keywords):
-            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Semantic tokens match risk profiles common to traditional 419 social engineering architectures or localized banking identity verification traps.")
+            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Semantic tokens match risk profiles common to traditional 419 social engineering architectures.")
 
-        # Heuristic 4: Link Safety Check
-        if "http" in email_input.lower() or "link" in padded_input:
+        # Heuristic 4: Link Safety Check (Removed generic "link" keyword to stop false positives)
+        if "http" in email_input.lower():
             trusted_domains = ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng', 'youversion']
             if not any(domain in email_input.lower() for domain in trusted_domains):
                 red_flags.append("**Unverified Hyperlink Redirect:** The system detected web redirect parameters unverified by trusted infrastructure whitelists.")
 
         st.divider()
 
-        # 7. Optimized Multi-Tiered Classification Boundary
-        is_threat = (prediction == 1 or probability >= 0.65)
+        # 7. Intelligent Multi-Tiered Classification Boundary
+        flag_count = len(red_flags)
         
-        # Dynamic Risk Calculator: Instead of forcing an 88% cap, we add a 15% penalty 
-        # to the ML probability for every red flag found, capping at 99.9% max.
-        if len(red_flags) >= 1:
+        # Base condition: The ML model is highly confident it's a threat (>70%)
+        if probability >= 0.70:
             is_threat = True
-            heuristic_penalty = len(red_flags) * 0.15
-            display_probability = min(probability + heuristic_penalty, 0.999)
+        # Safety Valve: There are MULTIPLE severe behavioral red flags (Catches the BVN-NIN email)
+        elif flag_count >= 2:
+            is_threat = True
+        # Borderline Case: Model is suspicious (>40%) AND there is at least one red flag
+        elif probability >= 0.40 and flag_count >= 1:
+            is_threat = True
         else:
-            display_probability = probability
+            is_threat = False
 
+        # Dynamic Risk Calculator for Display
         if is_threat:
+            if flag_count > 0:
+                # Add a 20% penalty per heuristic flag to accurately represent structural risk
+                boost = flag_count * 0.20
+                display_probability = min(probability + boost, 0.99)
+            else:
+                display_probability = probability
+            
             st.error(f"[!] THREAT IDENTIFIED | RISK INDEX: {display_probability*100:.1f}%")
             
             st.markdown("### [?] Educational Breakdown")
@@ -107,6 +112,7 @@ if st.button("Analyze Email Threat"):
             * **Contact Directly:** Reach out to organizational support lines using authenticated contacts independent of the suspicious text message.
             """)
         else:
+            # For safe emails, display the actual safety certainty (100% - risk probability)
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
             st.markdown("### [+] Why this was marked safe")
             st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
