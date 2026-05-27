@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 
 # 1. Page Configuration (MUST BE FIRST)
-st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
 
 # 2. Cache the models in memory so the cloud app runs instantly!
 @st.cache_resource
