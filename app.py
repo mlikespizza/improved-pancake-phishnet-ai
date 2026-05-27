@@ -2,7 +2,7 @@ import streamlit as st
 import joblib
 
 # 1. Page Configuration (MUST BE FIRST)
-st.set_page_config(page_title="PhishNet AI", page_icon="🤺", layout="centered")
+st.set_page_config(page_title="PhishNet AI", page_icon="🛡️", layout="centered")
 
 # 2. Load the saved model and vectorizer
 try:
@@ -51,41 +51,41 @@ if st.button("Analyze Email Threat"):
         padded_input = " " + " ".join(clean_input.split()) + " "
 
         # Heuristic 1: Artificial Urgency Matrix
-        urgency_keywords = ['urgent', 'immediately', '2 hours', '12 hours', 'action required', 'act now', 'suspended']
+        urgency_keywords = ['urgent', 'immediately', '2 hours', '12 hours', 'action required', 'act now', 'suspended', 'suspension', 'deadline']
         if any(f" {word} " in padded_input for word in urgency_keywords):
             red_flags.append("**Artificial Urgency:** Scammers implement aggressive time pressure matrices to bypass your critical evaluation loops.")
         
         # Heuristic 2: Credential Harvesting Phrasing
-        harvesting_keywords = ['verify', 'login', 'password', 'identity', 'compromised', 'restricted', 'bvn', 'nin', 'linkage']
+        harvesting_keywords = ['verify', 'login', 'password', 'identity', 'compromised', 'restricted', 'bvn', 'nin', 'linkage', 'restriction']
         if any(f" {word} " in padded_input for word in harvesting_keywords):
             red_flags.append("**Credential Harvesting Target:** The email text targets security verification patterns or account linkage dependencies common in data harvesting traps.")
         
         # Heuristic 3: 419 / Financial Fraud Tokens
-        scam_keywords = ['transfer', 'million', 'inheritance', 'partnership', 'funds', 'prize', 'claim']
+        scam_keywords = ['transfer', 'transfers', 'million', 'inheritance', 'partnership', 'funds', 'prize', 'claim', 'central bank']
         if any(f" {word} " in padded_input for word in scam_keywords):
-            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Semantic tokens match risk profiles common to traditional 419 social engineering architectures or localized inheritance scams.")
+            red_flags.append("🇳🇬 **Advance Fee / Localized Fraud:** Semantic tokens match risk profiles common to traditional 419 social engineering architectures or localized banking identity verification traps.")
 
         # Heuristic 4: Link Safety Check
-        if "http" in email_input.lower():
+        if "http" in email_input.lower() or "link" in padded_input:
             trusted_domains = ['amazon.com', 'microsoft.com', 'netflix.com', 'google.com', 'pau.edu.ng', 'youversion']
             if not any(domain in email_input.lower() for domain in trusted_domains):
-                red_flags.append("**Unverified Hyperlink Redirect:** The system detected web redirect links unverified by trusted infrastructure whitelists.")
+                red_flags.append("**Unverified Hyperlink Redirect:** The system detected web redirect parameters unverified by trusted infrastructure whitelists.")
 
         st.divider()
 
         # 7. Optimized Multi-Tiered Classification Boundary (The Final Shield)
-        # CRITICAL UPDATE: If the text triggers multiple explicit local social engineering 
-        # heuristics (urgency, harvesting, or unverified domains), it is structurally 
-        # flagged as a threat, completely overriding statistical dataset blind spots.
+        # If the text triggers any explicit localized or behavioral social engineering heuristics 
+        # (urgency, harvesting, fraud tokens), it is structurally flagged as a threat.
+        # This completely overrides statistical model blind spots caused by localized vocabulary shifts.
         
-        # Base condition: Model flags it OR high probability density
+        # Base condition: Machine Learning model registers a statistical threat
         is_threat = (prediction == 1 or probability >= 0.65)
         
-        # Override condition: Severe behavioral red flags are found (even if ML model misses it)
+        # Safety Valve Override: If expert heuristic red flags are triggered, force threat state
         if len(red_flags) >= 1:
             is_threat = True
-            # Dynamically adjust risk index display to reflect behavioral hazard
-            display_probability = max(probability, 0.75)
+            # Dynamically display a risk index reflecting the heuristic hazard severity
+            display_probability = max(probability, 0.88)
         else:
             display_probability = probability
 
@@ -110,6 +110,9 @@ if st.button("Analyze Email Threat"):
             st.success(f"[OK] ANALYSIS COMPLETE | CERTAINTY: {(1-probability)*100:.1f}%")
             st.markdown("### [+] Why this was marked safe")
             st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
+
+    else:
+        st.warning("Please paste an email body to analyze.")
 
 # Footer Disclaimer
 st.markdown('<p class="footer">PhishNet AI is an educational tool. Use your own judgment for critical security decisions.</p>', unsafe_allow_html=True)
