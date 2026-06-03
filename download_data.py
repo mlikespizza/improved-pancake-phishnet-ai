@@ -2,10 +2,10 @@ import kagglehub
 import os
 import shutil
 
-# 1. Define the local data folder
+# 1. Defines the local data folder
 local_data_dir = os.path.join(os.getcwd(), "data")
 
-# 2. Safety Check: If 'data' exists as a file, remove it; if not, create the folder
+# 2. Safety Check: If the 'data' exists as a file, it removes it. if not, it creates the folder
 if os.path.exists(local_data_dir):
     if os.path.isfile(local_data_dir):
         os.remove(local_data_dir)
@@ -24,22 +24,21 @@ print("--- PhishNet AI: Step 1 (Data Retrieval) ---")
 for ds in datasets:
     try:
         print(f"\nLocating: {ds}...")
-        # Since you've already downloaded them, this will be instant
         cached_path = kagglehub.dataset_download(ds)
         
-        # Walk through the cached folder
+        # Walks through the cached folder
         for root, dirs, files in os.walk(cached_path):
             for file in files:
-                # Skip system files like .DS_Store or hidden metadata
+                # Skips system files like .DS_Store or hidden metadata
                 if file.startswith('.') or file.endswith('.archive'):
                     continue
                 
                 source_file = os.path.join(root, file)
-                # Create a unique name to avoid overwriting
+                # Creates a unique name to avoid overwriting
                 unique_name = f"{ds.split('/')[-1]}_{file}"
                 destination = os.path.join(local_data_dir, unique_name)
                 
-                # Copy the file to your project
+                # Copies the file to your project
                 shutil.copy2(source_file, destination)
                 print(f"  + Successfully copied: {file}")
                 
@@ -47,4 +46,4 @@ for ds in datasets:
         print(f"  ! Error processing {ds}: {e}")
 
 print("\n--- DONE ---")
-print(f"Check your 'data' folder on the left side of Windsurf.")
+print(f"Check your 'data' folder.")
