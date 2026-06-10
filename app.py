@@ -29,7 +29,8 @@ def load_model():
 try:
     model, tfidf = load_model()
 except Exception:
-    st.error("⚠️ Model files not found. Please ensure `phishnet_model.pkl` and `tfidf_vectorizer.pkl` are in the project root.")
+    st.error("⚠️ Model files not found. " \
+    "Please ensure `phishnet_model.pkl` and `tfidf_vectorizer.pkl` are in the project root.")
     st.stop()
 
 
@@ -43,13 +44,21 @@ st.markdown("""
 
     html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     .stApp { background-color: #0b1120; color: white; }
-    .main-title { font-size: 50px !important; font-weight: 800; color: #60a5fa; text-align: center; margin-top: -20px; letter-spacing: -1px; }
+    .main-title { font-size: 50px 
+            !important; font-weight: 800; color: #60a5fa; text-align: center; 
+            margin-top: -20px; letter-spacing: -1px; }
     .sub-text { font-size: 18px; color: #94a3b8; text-align: center; margin-bottom: 8px; }
     .model-badge { font-size: 13px; color: #475569; text-align: center; margin-bottom: 28px; }
-    .stTextArea textarea { background-color: #1e293b !important; color: #e2e8f0 !important; border: 1px solid #334155 !important; border-radius: 10px !important; font-family: 'Inter', sans-serif !important; }
-    div.stButton > button { width: 100%; background: linear-gradient(135deg, #3b82f6, #6366f1) !important; color: white !important; font-weight: 700 !important; font-size: 16px !important; padding: 15px !important; border-radius: 10px !important; border: none !important; transition: opacity 0.2s ease; }
+    .stTextArea textarea { background-color: #1e293b 
+            !important; color: #e2e8f0 !important; border: 1px solid #334155 
+            !important; border-radius: 10px !important; font-family: 'Inter', sans-serif !important; }
+    div.stButton > button { width: 100%; background: linear-gradient(135deg, #3b82f6, #6366f1) 
+            !important; color: white !important; font-weight: 700 !important; font-size: 16px 
+            !important; padding: 15px !important; border-radius: 10px !important; border: none 
+            !important; transition: opacity 0.2s ease; }
     div.stButton > button:hover { opacity: 0.88; }
-    .footer { font-size: 12px; color: #475569; text-align: center; margin-top: 60px; border-top: 1px solid #1e293b; padding-top: 20px; }
+    .footer { font-size: 12px; color: #475569; text-align: center; 
+            margin-top: 60px; border-top: 1px solid #1e293b; padding-top: 20px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -58,8 +67,10 @@ st.markdown("""
 # Renders the title, subtitle, and a credibility caption that communicates
 # the underlying technology stack to the user 
 st.markdown('<p class="main-title">PhishNet AI</p>', unsafe_allow_html=True)
-st.markdown('<p class="sub-text">Detect phishing emails with AI, and learn why they\'re dangerous.</p>', unsafe_allow_html=True)
-st.markdown('<p class="model-badge">Powered by Logistic Regression + TF-IDF Vectorization · Trained on ~15,571 emails</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-text">Detect phishing emails with AI, '
+'and learn why they\'re dangerous.</p>', unsafe_allow_html=True)
+st.markdown('<p class="model-badge">Powered by Logistic Regression + TF-IDF Vectorization ' \
+'· Trained on ~15,571 emails</p>', unsafe_allow_html=True)
 
 
 # SECTION 5: USER INPUT
@@ -217,8 +228,10 @@ if st.button("Analyze Email Threat"):
             st.warning("### ⚠️ Recommended Actions")
             st.markdown("""
             - **Do not click** any links or download attachments from this email.
-            - **Verify the sender** by contacting the organisation directly through their official website — not through contact details in the email.
-            - **Do not submit** any personal information (passwords, ID numbers, banking details) in response to this email.
+            - **Verify the sender** by contacting the organisation directly through their official website 
+                        — not through contact details in the email.
+            - **Do not submit** any personal information (passwords, ID numbers, banking details) 
+                        in response to this email.
             - **Report it** to your email provider and, if applicable, to your organisation's IT/security team.
             """)
 
@@ -228,12 +241,14 @@ if st.button("Analyze Email Threat"):
             # (1 - P(phishing)) = P(safe), expressed as a percentage.
             st.success(f"✅ EMAIL APPEARS SAFE — Safety Certainty: **{(1-probability)*100:.1f}%**")
             st.markdown("### 📋 Why This Email Was Classified as Safe")
-            st.write("The evaluated data block maps cleanly inside standard safe communication distributions and lacks concentrated high-risk social engineering markers.")
+            st.write("The evaluated data block maps cleanly inside standard safe communication " \
+            "distributions and lacks concentrated high-risk social engineering markers.")
 
 
 # SECTION 7: FOOTER
 # Disclaimer reminding users that PhishNet AI is an educational tool.
 st.markdown(
-    '<p class="footer">PhishNet AI is an educational tool. Use your own judgement for critical security decisions.</p>',
+    '<p class="footer">PhishNet AI is an educational tool. Use your own judgement for critical ' \
+    'security decisions.</p>',
     unsafe_allow_html=True
 )
