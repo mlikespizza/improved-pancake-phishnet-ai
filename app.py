@@ -23,7 +23,7 @@ def load_model():
     tfidf = joblib.load('tfidf_vectorizer.pkl')
     return model, tfidf
 
-# Attempt to load — halt with a clear error message if files are missing.
+# Attempt to load, stop with a clear error message if files are missing.
 # st.stop() prevents execution from continuing to the analysis block,
 # which would otherwise raise a NameError on undefined variables.
 try:
@@ -33,7 +33,7 @@ except Exception:
     st.stop()
 
 
-# SECTION 3: My CUSTOM CSS — DARK THEME STYLING
+# SECTION 3: My CUSTOM CSS DARK THEME STYLING
 # Streamlit's default UI is injected with custom CSS via st.markdown with
 # unsafe_allow_html=True. This overrides default widget styles to produce a
 # dark-mode design system across the application.
