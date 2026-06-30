@@ -57,8 +57,9 @@ st.markdown("""
             !important; padding: 15px !important; border-radius: 10px !important; border: none 
             !important; transition: opacity 0.2s ease; }
     div.stButton > button:hover { opacity: 0.88; }
-    .footer { font-size: 12px; color: #475569; text-align: center; 
-            margin-top: 60px; border-top: 1px solid #1e293b; padding-top: 20px; }
+    .footer { font-size: 20px; color: #94a3b8; text-align: center; 
+            margin-top: 60px; border-top: 1px solid #334155; padding: 24px 16px 12px; 
+            line-height: 1.6; letter-spacing: 0.2px; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -248,7 +249,7 @@ if st.button("Analyze Email Threat"):
 # SECTION 7: FOOTER
 # Disclaimer reminding users that PhishNet AI is an educational tool.
 st.markdown(
-    '<p class="footer">PhishNet AI is an educational tool. Use your own judgement for critical ' \
-    'security decisions.</p>',
+    '<p class="footer">⚠️ <strong>Disclaimer:</strong> PhishNet AI is an educational tool. ' \
+    'Always use your own judgement for critical security decisions.</p>',
     unsafe_allow_html=True
 )
